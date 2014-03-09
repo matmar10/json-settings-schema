@@ -1,0 +1,5 @@
+{
+    "auth": {
+        "sessionTtl": 0
+    }
+}
