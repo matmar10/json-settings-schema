@@ -1,6 +1,6 @@
 {
   "name": "json-settings-schema",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Use json schema to validate project settings and produce defaults",
   "main": "index.js",
   "scripts": {
