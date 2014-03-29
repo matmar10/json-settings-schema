@@ -1,6 +1,6 @@
 {
     "name": "json-settings-schema",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Use json schema spec to validate a provided JSON object or filename including schema's defaults",
     "main": "json-settings-schema.js",
     "scripts": {
