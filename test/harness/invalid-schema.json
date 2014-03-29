@@ -1,0 +1,18 @@
+{
+    "title": "Example Schema",
+    "description": "schema for Example JS client application settings",
+    "type": "object",
+    "properties": {
+        "auth": {
+            "type": "object",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/authSettings"
+                }
+            ],
+            "required": true
+        }
+    },
+    "required": ["auth"],
+    "definitions": {}
+}

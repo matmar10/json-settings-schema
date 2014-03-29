@@ -18,7 +18,7 @@ var getSchemaFromRef = function (schema, ref) {
     }
 
     if (!value) {
-        throw new ReferenceError('no schema found for ref ' + trimmedRef + ' in schema ' + JSON.stringify(schema));
+        throw new ReferenceError('no schema found for ref ' + ref + ' in schema ' + JSON.stringify(schema));
     }
 
     return value;
