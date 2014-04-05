@@ -4,7 +4,15 @@ var tv4 = require('tv4');
 var extend = require('extend');
 var fs = require('fs');
 var Q = require('Q');
+var util = require('util');
 
+/**
+ * Searches for a sub-schema identified by the reference within
+ *
+ * @param {Object} schema - A JSON Schema object
+ * @param {String} ref - The schema ref path to look up
+ * @returns {Object} - The schema identified by the provided ref
+ */
 var getSchemaFromRef = function (schema, ref) {
 
     var trimmedRef = ref.replace('#/', ''),
@@ -24,52 +32,81 @@ var getSchemaFromRef = function (schema, ref) {
     return value;
 };
 
-var calls = 1;
-
+/**
+ * Recursively builds the defaults for the given schema, if they exist
+ * If schemaLeaf is provided, only defaults for that leaf are returned
+ * This is useful for when a schema leaf may reference the definitions within another schema
+ *
+ * @param {Object} schema - A JSON Schema object
+ * @param {Object} [schemaLeaf] - A leaf within the overall schema tree
+ * @returns {Object|Number|null} - The defaults from the schema leaf
+ */
 var buildDefaults = function (schema, schemaLeaf) {
 
     schemaLeaf = schemaLeaf || schema;
 
-    var newTree = {}, propertyName, property, i, additionalDefaults;
+    var newNode,
+        propertyName,
+        property,
+        i,
+        oneOf,
+        oneOfSchema,
+        oneOfDefaults,
+        propertyDefaults;
 
-    if (schemaLeaf.properties) {
-        for (propertyName in schemaLeaf.properties) {
-            if (!schemaLeaf.properties.hasOwnProperty(propertyName)) {
+    if ('undefined' !== typeof(schemaLeaf.default)) {
+        newNode = schemaLeaf.default;
+    }
+
+    if (schemaLeaf.oneOf) {
+        for (i = 0; i < schemaLeaf.oneOf.length; i++) {
+
+            oneOf = schemaLeaf.oneOf[i];
+            if (!oneOf.$ref) {
                 continue;
             }
 
-            property = schemaLeaf.properties[propertyName];
-            if ('undefined' !== typeof property['default']) {
-                newTree[propertyName] = property['default'];
-                // ignore other info if this is a primitive
-                if ('object' !== property.type) {
-                    continue;
-                }
-            }
-
-            if (property.oneOf) {
-                for (i = 0; i < property.oneOf.length; i++) {
-                    additionalDefaults = buildDefaults(schema, property.oneOf[i]);
-                    if ('object' === typeof additionalDefaults) {
-                        newTree[propertyName] = extend(true, newTree[propertyName] || {}, additionalDefaults);
-                        continue;
-                    }
-                    newTree[propertyName] = additionalDefaults;
-                }
+            oneOfSchema = getSchemaFromRef(schema, oneOf.$ref);
+            oneOfDefaults = buildDefaults(schema, oneOfSchema);
+            if ('object' === typeof oneOfDefaults) {
+                newNode = extend(newNode, oneOfDefaults);
+            } else {
+                newNode = oneOfDefaults;
             }
         }
     }
 
-    if (schemaLeaf.$ref) {
-        newTree = extend(true, newTree, buildDefaults(schema, getSchemaFromRef(schema, schemaLeaf.$ref)));
+    if ('object' === typeof schemaLeaf.properties) {
+        // node must be an object to have sub properties
+        if ('undefined' === typeof newNode) {
+            newNode = {};
+        }
+        for (propertyName in schemaLeaf.properties) {
+            if (!schemaLeaf.properties.hasOwnProperty(propertyName)) {
+                continue;
+            }
+            property = schemaLeaf.properties[propertyName];
+            propertyDefaults = buildDefaults(schema, property);
+            if ('object' === typeof propertyDefaults) {
+                newNode[propertyName] = extend(true, newNode[propertyName], propertyDefaults);
+            } else {
+                newNode[propertyName] = propertyDefaults;
+            }
+        }
     }
 
-    return newTree;
+    return newNode;
 };
 
+/**
+ * Validate the data against the schema
+ *
+ * @param {Object} settings - An object containing settings to be validated against the schema
+ * @param {Object} schema - A schema object
+ * @param {Function} callback - The callback to be invoked upon validation
+ */
 var validate = function (settings, schema, callback) {
     var defaults, effectiveSettings;
-
 
     try {
         defaults = buildDefaults(schema);
@@ -80,11 +117,19 @@ var validate = function (settings, schema, callback) {
     effectiveSettings = extend(true, defaults, settings);
 
     if (!tv4.validate(effectiveSettings, schema)) {
-        return callback(tv4.error);
+        callback(tv4.error);
+        return;
     }
-    return callback(null, effectiveSettings);
+    callback(null, effectiveSettings);
 };
 
+/**
+ * Validate the data against the schema
+ *
+ * @param {Object|String} settings - An object or path to a file containing settings to be validated against the schema
+ * @param {Object|String} schema - An object or path to a file containing a schema
+ * @param {Function} callback - The callback to be invoked upon validation
+ */
 var buildSettings = function (settings, schema, callback) {
     var params = {
             schema: schema,

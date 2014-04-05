@@ -14,11 +14,12 @@ exports.settingsSchema = {
 
         s.buildSettings(settingsOverrides, schema, function (err, settings) {
             if (err) {
+                console.log(err);
                 throw err;
             }
             test.deepEqual(settings, {
                 "auth": {
-                    "sessionTtl": 0,
+                    "sessionTtl": 0, // changed by example/settings.json
                     "productDataAuthStateRequired": "AuthenticatedVerified",
                     "stateLevels": {
                         "Unauthenticated": 0,
@@ -29,12 +30,20 @@ exports.settingsSchema = {
                     },
                     "authSessionEvents": {
                         "end": {
-                            "authState": "Unauthenticated",
+                            "authState": "differentEndAuthState", // changed by example/settings.json
                             "uiState": "login"
                         },
                         "timeout": {
                             "authState": "Identified",
                             "uiState": "main.dda"
+                        }
+                    }
+                },
+                "other": {
+                    "otherOne": "other one",
+                    "otherTwo": {
+                        "otherChild": {
+                            "otherGrandchild": "grand child"
                         }
                     }
                 }
@@ -45,14 +54,18 @@ exports.settingsSchema = {
     },
     testInvalidSchema: function (test) {
 
-        var ref = '#/definitions/authSettings';
-        var schema = require('./harness/invalid-schema.json');
-        var settingsOverrides = require('./../example/settings.json');
+        var ref = '#/definitions/authSettings',
+            schema = require('./harness/invalid-schema.json'),
+            settingsOverrides = require('./../example/settings.json');
 
+        test.expect(1);
         test.throws(new ReferenceError('no schema found for ref ' + ref + ' in schema ' + JSON.stringify(schema)));
 
         s.buildSettings(settingsOverrides, schema, function (err, settings) {
-            throw err;
+            if (err) {
+                throw err;
+            }
+            // test.ok(err instanceof ReferenceError);
         });
 
         test.done();

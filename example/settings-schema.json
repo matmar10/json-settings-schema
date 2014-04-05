@@ -9,8 +9,30 @@
                 {
                     "$ref": "#/definitions/authSettings"
                 }
-            ],
-            "required": true
+            ]
+        },
+        "other": {
+            "type": "object",
+            "properties": {
+                "otherOne": {
+                    "type": "string",
+                    "default": "other one"
+                },
+                "otherTwo": {
+                    "type": "object",
+                    "properties": {
+                        "otherChild": {
+                            "type": "object",
+                            "properties": {
+                                "otherGrandchild": {
+                                    "type": "string",
+                                    "default": "grand child"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "required": ["auth"],
