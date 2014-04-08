@@ -51,8 +51,7 @@ var buildDefaults = function (schema, schemaLeaf) {
         i,
         oneOf,
         oneOfSchema,
-        oneOfDefaults,
-        propertyDefaults;
+        defaults;
 
     if ('undefined' !== typeof(schemaLeaf.default)) {
         newNode = schemaLeaf.default;
@@ -67,11 +66,12 @@ var buildDefaults = function (schema, schemaLeaf) {
             }
 
             oneOfSchema = getSchemaFromRef(schema, oneOf.$ref);
-            oneOfDefaults = buildDefaults(schema, oneOfSchema);
-            if ('object' === typeof oneOfDefaults) {
-                newNode = extend(newNode, oneOfDefaults);
+            defaults = buildDefaults(schema, oneOfSchema);
+            // be careful not to confuse Array with Object (since Objects ARE also Arrays)
+            if ('object' === typeof defaults && !util.isArray(defaults)) {
+                newNode = extend(newNode, defaults);
             } else {
-                newNode = oneOfDefaults;
+                newNode = defaults;
             }
         }
     }
@@ -86,11 +86,12 @@ var buildDefaults = function (schema, schemaLeaf) {
                 continue;
             }
             property = schemaLeaf.properties[propertyName];
-            propertyDefaults = buildDefaults(schema, property);
-            if ('object' === typeof propertyDefaults) {
-                newNode[propertyName] = extend(true, newNode[propertyName], propertyDefaults);
+            defaults = buildDefaults(schema, property);
+            // be careful not to confuse Array with Object (since Objects ARE also Arrays)
+            if ('object' === typeof defaults && !util.isArray(defaults)) {
+                newNode[propertyName] = extend(true, newNode[propertyName], defaults);
             } else {
-                newNode[propertyName] = propertyDefaults;
+                newNode[propertyName] = defaults;
             }
         }
     }
@@ -175,6 +176,3 @@ module.exports = {
     getSchemaFromRef: getSchemaFromRef,
     validate: validate
 };
-
-
-

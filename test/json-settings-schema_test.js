@@ -9,8 +9,8 @@ exports.settingsSchema = {
     testSuccess: function (test) {
         test.expect(1);
 
-        var schema = require('./../example/settings-schema.json');
-        var settingsOverrides = require('./../example/settings.json');
+        var schema = require('./harness/basic-settings-schema.json');
+        var settingsOverrides = require('./harness/override-session-ttl-and-auth-state.json');
 
         s.buildSettings(settingsOverrides, schema, function (err, settings) {
             if (err) {
@@ -69,5 +69,29 @@ exports.settingsSchema = {
         });
 
         test.done();
+    },
+    testSchemaWithArrays: function (test) {
+        test.expect(1);
+
+        var schema = require('./harness/schema-with-arrays.json');
+
+        s.buildSettings({}, schema, function (err, settings) {
+            if (err) {
+                console.log(err);
+                throw err;
+            }
+            test.deepEqual(settings, {
+                datePicker: {
+                    maxSearchDays: 0,
+                    minDays: 0,
+                    maxDays: 30,
+                    blackOutDays: [0,6],
+                    blackOutDates: []
+                }
+            }, 'parses schema as expected');
+
+            test.done();
+        });
     }
+
 };

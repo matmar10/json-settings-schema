@@ -1,0 +1,49 @@
+{
+    "title": "Date Picker Settings",
+    "description": "Settings to set the behavior of the date picker",
+    "type": "object",
+    "properties": {
+        "datePicker": {
+            "description": "Main date picker settings",
+                "type": "object",
+                "properties": {
+                "maxSearchDays": {
+                    "description": "The maximum days to search before today's date. Used on search page",
+                        "type": "integer",
+                        "default": 0
+                },
+                "minDays": {
+                    "description": "The number of days before a user is able to select a date. Should be less than the maxDays",
+                        "type": "integer",
+                        "default": 0
+                },
+                "maxDays": {
+                    "description": "The total number of days that user is able to select a date until. Should be greater than minDays",
+                        "type": "integer",
+                        "default": 30
+                },
+                "blackOutDays": {
+                    "description": "Days of the week indicated by 0 (Sunday) though 6 (Saturday) that will be blacked out",
+                        "type": "array",
+                        "default": [0, 6]
+                },
+                "blackOutDates": {
+                    "description": "Date Ranges or individual dates in the following format: ['20 Mar 2014 - 1 May 2014', '28 Apr 2014'] that are blacked out or unselectable on the calendar. Typically holidays. ",
+                        "type": "array",
+                        "default": []
+                }
+            },
+            "required": [
+                "maxSearchDays",
+                "minDays",
+                "maxDays",
+                "blackOutDays",
+                "blackOutDates"
+            ]
+
+        }
+    },
+    "required": [
+        "datePicker"
+    ]
+}

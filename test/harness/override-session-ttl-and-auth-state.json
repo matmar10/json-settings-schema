@@ -1,0 +1,10 @@
+{
+    "auth": {
+        "sessionTtl": 0,
+        "authSessionEvents": {
+            "end": {
+                "authState": "differentEndAuthState"
+            }
+        }
+    }
+}
