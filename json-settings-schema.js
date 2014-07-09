@@ -3,7 +3,7 @@
 var tv4 = require('tv4');
 var extend = require('extend');
 var fs = require('fs');
-var Q = require('Q');
+var Q = require('q');
 var util = require('util');
 
 /**
